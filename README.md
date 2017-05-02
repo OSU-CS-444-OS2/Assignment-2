@@ -15,20 +15,22 @@
   * Don't forget to MERGE. Either front or back, not both.
   * You will need to disable virtio on qemu in order to do this assignment. I leave it to you to figure out how to do that. Please see the qemu man pages for details if you're lost.
   * I really hope you actually did look up the different options for qemu, as you'll need to make a change this time to get your IO scheduler to be used.
-  * You are also required to do the following write-up including:
+
+
+3. You are also required to do the following write-up including:
   * The design you plan to use to implement the SSTF algorithms.
   * Your version control log.
   * A work log, detailing what you did when. Ideally, this is the same as the above.
 
 
-3. Answer the following questions in sufficient detail:
+4. Answer the following questions in sufficient detail:
   * What do you think the main point of this assignment is?
   * How did you personally approach the problem? Design decisions, algorithm, etc.
   * How did you ensure your solution was correct? Testing details, for instance.
   * What did you learn?
 
 
-4. Make sure your submission is a tarball labelled CS444_project2_#.tar.bz2 and includes the following:
+5. Make sure your submission is a tarball labelled CS444_project2_#.tar.bz2 and includes the following:
   * A linux patch file containing your solution
   * The write-up in LaTeX format.
   * A makefile for the LaTeX file.
