@@ -1,6 +1,4 @@
-# Assignment-2
-
-## Kernel 
+# Assignment-2-Kernel 
 
 1. In this project you will be developing your solution on the virtual machine. Using the yocto Linux kernel sources as described in HW1, you are asked to implement the following:
   * The LOOK I/O scheduler
