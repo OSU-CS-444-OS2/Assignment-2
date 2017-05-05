@@ -12,6 +12,10 @@ struct sstf_data {
 	struct list_head queue;
 
 	//add additional stuff
+	sector_t head;
+
+	//Add direction for LOOK
+	//int direction;
 }; 
 
 //request merge		*
@@ -36,12 +40,22 @@ static int sstf_dispatch( struct request_queue *q, int force ) {
 	return 0;
 }
 
+//--------------------------------------------------------------------------------------------------
+//---------------------------------------redo function----------------------------------------------
+//--------------------------------------------------------------------------------------------------
+
 //add request		X
 //adds the new request to the tail of the list -> linux version
 // new request to the correct location in the list -> is what we have to do
 static void sstf_add_request( struct request_queue *q, struct request *rq ) {
+	struct sstf_data *sd = q->elevator->elevator_data;
 
+	list_add_tail( &rq->queuelist, &sd->queue );
 }
+
+//--------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 
 //former request	*
 //adding another queue to the list
@@ -95,7 +109,7 @@ static int sstf_init_queue( struct request_queue *q, struct elevator_type *e ){
 
 //exit queue	*
 static void sstf_exit_queue( struct elevator_queue *e ) {
-	struct sstf_struct *sd = e->elevator_data;
+	struct sstf_data *sd = e->elevator_data;
 
 	BUG_ON( !list_empty( &sd->queue ) );
 	kfree( sd );
