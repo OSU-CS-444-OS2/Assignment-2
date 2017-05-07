@@ -25,15 +25,18 @@ static void sstf_merged_requests( struct request_queue *q, struct request *rq, s
 }
 
 //dispatch		
-//Actaul moving to teh disk
+//Actaul moving to the disk
+//return 0 if it doesn't work
+//return 1 if it does work
 static int sstf_dispatch( struct request_queue *q, int force ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
-	struct request *rq;
 
-	rq = list_first_entry_or_null(&sd->queue, struct request, queuelist);
-	if (rq) {
-		list_del_init(&rq->queuelist);
-		elv_dispatch_sort(q, rq);
+	if (!list_empty(&nd->queue)) {
+		struct request *rq;
+		rq = list_entry( nd->queue.next, struct request, queuelist );
+		list_del_init( &rq->queuelist );
+		//HEAD
+		elv_dispatch_sort( q, rq );
 		return 1;
 	}
 
@@ -50,7 +53,15 @@ static int sstf_dispatch( struct request_queue *q, int force ) {
 static void sstf_add_request( struct request_queue *q, struct request *rq ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
 
-	list_add_tail( &rq->queuelist, &sd->queue );
+	//this should only happen if this is the starting queue
+	//if(list has none){
+		list_add_tail( &rq->queuelist, &sd->queue );	//      \/
+		//list_add(&rq->queuelist, &nd->queue);		//Don't know the difference
+
+	//} else {  //list has been started
+		//	Find where the request needs to be in the queue
+		//	Put it into the list at the place
+	//}
 }
 
 //--------------------------------------------------------------------------------------------------
