@@ -55,8 +55,7 @@ static void sstf_add_request( struct request_queue *q, struct request *rq ) {
 	} else {  //list has been started
 
 		//Find where the request needs to be in the queue
-		struct request rqCheck; 
-		rqCheck = list_entry( nd->queue.next, struct request, queuelist );
+		struct request rqCheck = list_entry( nd->queue.next, struct request, queuelist );
 	
 		//Don't know if this will work
 		while( blk_rq_pos( rq ) > blk_rq_pos( rqCheck ) ){
