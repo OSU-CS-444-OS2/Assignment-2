@@ -42,40 +42,31 @@ static int sstf_dispatch( struct request_queue *q, int force ) {
 	return 0;
 }
 
-//--------------------------------------------------------------------------------------------------
-//---------------------------------------redo function----------------------------------------------
-//--------------------------------------------------------------------------------------------------
-
-//add request		X
+//add request
 //adds the new request to the tail of the list -> linux version
 // new request to the correct location in the list -> is what we have to do
 static void sstf_add_request( struct request_queue *q, struct request *rq ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
 
 	//this should only happen if this is the starting of the queue
-	//if(list has none){
 	if( list_empty( sd->queue ) ){
 		list_add( &rq->queuelist, &sd->queue );
 
 	} else {  //list has been started
 
-		//	Find where the request needs to be in the queue
-		struct request rpNext, rpPrev; 
+		//Find where the request needs to be in the queue
+		struct request rqCheck; 
 		rqCheck = list_entry( nd->queue.next, struct request, queuelist );
 	
 		//Don't know if this will work
-		while( blk_rq_pos( rq ) < blk_rq_pos( rqCheck ) ){
+		while( blk_rq_pos( rq ) > blk_rq_pos( rqCheck ) ){
 			rqCheck = list_entry( rqCheck->queue.next, struct request, queuelist );
 		}
 
-		//	Put it into the list at the place
+		//Put it into the list at the place after the spot
 		list_add_tail( &rq->queuelist, &rqCheck->queuelist );
 	}
 }
-
-//--------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------
 
 //former request
 //adding another queue to the list
@@ -110,7 +101,7 @@ static int sstf_init_queue( struct request_queue *q, struct elevator_type *e ){
 		return -ENOMEM;
 	}
 
-	ss = kmalloc_node( sizeof( *sd ), GFP_KERNEL, q->node );
+	sd = kmalloc_node( sizeof( *sd ), GFP_KERNEL, q->node );
 	if ( !sd ) {
 		kobject_put( &eq->kobj );
 		return -ENOMEM;
