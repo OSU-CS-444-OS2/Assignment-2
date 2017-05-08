@@ -12,13 +12,13 @@ struct sstf_data {
 	struct list_head queue;
 
 	//add additional stuff
-	sector_t head;
+	//sector_t head;
 
 	//Add direction for LOOK
 	//int direction;
 }; 
 
-//request merge		*
+//request merge
 //it makes it a link list... removes head and attackes the tail to new front
 static void sstf_merged_requests( struct request_queue *q, struct request *rq, struct request *next ) {
 	list_del_init( &next->queuelist );
@@ -35,7 +35,6 @@ static int sstf_dispatch( struct request_queue *q, int force ) {
 		struct request *rq;
 		rq = list_entry( nd->queue.next, struct request, queuelist );
 		list_del_init( &rq->queuelist );
-		//HEAD
 		elv_dispatch_sort( q, rq );
 		return 1;
 	}
@@ -53,22 +52,32 @@ static int sstf_dispatch( struct request_queue *q, int force ) {
 static void sstf_add_request( struct request_queue *q, struct request *rq ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
 
-	//this should only happen if this is the starting queue
+	//this should only happen if this is the starting of the queue
 	//if(list has none){
-		list_add_tail( &rq->queuelist, &sd->queue );	//      \/
-		//list_add(&rq->queuelist, &nd->queue);		//Don't know the difference
+	if( list_empty( sd->queue ) ){
+		list_add( &rq->queuelist, &sd->queue );
 
-	//} else {  //list has been started
+	} else {  //list has been started
+
 		//	Find where the request needs to be in the queue
+		struct request rpNext, rpPrev; 
+		rqCheck = list_entry( nd->queue.next, struct request, queuelist );
+	
+		//Don't know if this will work
+		while( blk_rq_pos( rq ) < blk_rq_pos( rqCheck ) ){
+			rqCheck = list_entry( rqCheck->queue.next, struct request, queuelist );
+		}
+
 		//	Put it into the list at the place
-	//}
+		list_add_tail( &rq->queuelist, &rqCheck->queuelist );
+	}
 }
 
 //--------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------
 
-//former request	*
+//former request
 //adding another queue to the list
 static struct request * sstf_former_request( struct request_queue *q, struct request *rq ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
@@ -80,7 +89,7 @@ static struct request * sstf_former_request( struct request_queue *q, struct req
 	return list_entry( rq->queuelist.prev, struct request, queuelist );
 }
 
-//latter request	*
+//latter request
 static struct request * sstf_latter_request( struct request_queue *q, struct request *rq ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
 
@@ -91,7 +100,7 @@ static struct request * sstf_latter_request( struct request_queue *q, struct req
 	return list_entry( rq->queuelist.next, struct request, queuelist );
 }
 
-//init queue	*1
+//init queue
 static int sstf_init_queue( struct request_queue *q, struct elevator_type *e ){
 	struct sstf_data *sd;
 	struct elevator_queue *eq;
@@ -107,7 +116,6 @@ static int sstf_init_queue( struct request_queue *q, struct elevator_type *e ){
 		return -ENOMEM;
 	}
 
-	//sd->head = 0;
 	eq->elevator_data = sd;
 
 	INIT_LIST_HEAD( &sd->queue );
@@ -118,7 +126,7 @@ static int sstf_init_queue( struct request_queue *q, struct elevator_type *e ){
 	return 0;
 }
 
-//exit queue	*
+//exit queue
 static void sstf_exit_queue( struct elevator_queue *e ) {
 	struct sstf_data *sd = e->elevator_data;
 
@@ -126,7 +134,7 @@ static void sstf_exit_queue( struct elevator_queue *e ) {
 	kfree( sd );
 }
 
-//elevator	*
+//elevator
 static struct elevator_type elevator_sstf = {
 	.ops = {
 		.elevator_merge_req_fn		= sstf_merged_requests,
@@ -141,22 +149,22 @@ static struct elevator_type elevator_sstf = {
 	.elevator_owner = THIS_MODULE,
 };
 
-//init	*
+//init
 static int __init sstf_init( void ) {
 	return elv_register( &sstf_elevator );
 }
 
-//exit	*
+//exit
 static void __exit sstf_exit( void )  {
 	elv_unregister( &sstf_elevator );
 }
 
-//call init	*
+//call init
 module_init( sstf_init );
-//call exit	*
+//call exit
 module_exit( sstf_exit );
 
-//Extra stuff	*
+//Extra stuff
 MODULE_AUTHOR( "Kaiyuan Fan, Sophia Lui, Trevor Spear" );
 MODULE_LICENSE( "GPL" );
 MODULE_DESCRIPTION( "sstf IO scheduler" );
