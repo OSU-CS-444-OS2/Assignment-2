@@ -6,16 +6,10 @@
 #include <linux/init.h>
 
 
-//struct		X
+//struct
 struct sstf_data {
 	//Driver struct
 	struct list_head queue;
-
-	//add additional stuff
-	//sector_t head;
-
-	//Add direction for LOOK
-	//int direction;
 }; 
 
 //request merge
@@ -52,11 +46,12 @@ static int sstf_dispatch( struct request_queue *q, int force ) {
 // new request to the correct location in the list -> is what we have to do
 static void sstf_add_request( struct request_queue *q, struct request *rq ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
+	struct request *rqCheck;
 	
 	printk("sstf add request running\n");
 
 	//this should only happen if this is the starting of the queue
-	if( list_empty( sd->queue ) ){
+	if( list_empty( &sd->queue ) ){
 		printk("sstf add request started queue\n");
 		list_add( &rq->queuelist, &sd->queue );
 
@@ -64,12 +59,12 @@ static void sstf_add_request( struct request_queue *q, struct request *rq ) {
 
 		printk("sstf add request adding more request\n");
 
-		//Find where the request needs to be in the queue
-		struct request rqCheck = list_entry( sd->queue.next, struct request, queuelist );
+		//The request that is going through the list
+		rqCheck = list_entry( sd->queue.next, struct request, queuelist );
 	
-		//Don't know if this will work
+		//Find where the request needs to be in the queue
 		while( blk_rq_pos( rq ) > blk_rq_pos( rqCheck ) ){
-			rqCheck = list_entry( rqCheck->queue.next, struct request, queuelist );
+			rqCheck = list_entry( rqCheck->queuelist.next, struct request, queuelist );
 		}
 
 		//Put it into the list at the place after the spot
@@ -144,7 +139,7 @@ static struct elevator_type elevator_sstf = {
 		.elevator_add_req_fn		= sstf_add_request,
 		.elevator_former_req_fn		= sstf_former_request,
 		.elevator_latter_req_fn		= sstf_latter_request,
-		.elevator_init_f		= sstf_init_queue,
+		.elevator_init_fn		= sstf_init_queue,
 		.elevator_exit_fn		= sstf_exit_queue,
 	},
 	.elevator_name = "sstf",
@@ -153,12 +148,14 @@ static struct elevator_type elevator_sstf = {
 
 //init
 static int __init sstf_init( void ) {
-	return elv_register( &sstf_elevator );
+	printk( "sstf is running" );
+	return elv_register( &elevator_sstf );
 }
 
 //exit
 static void __exit sstf_exit( void )  {
-	elv_unregister( &sstf_elevator );
+	printk( "sstf is exiting" );
+	elv_unregister( &elevator_sstf );
 }
 
 //call init
@@ -167,6 +164,6 @@ module_init( sstf_init );
 module_exit( sstf_exit );
 
 //Extra stuff
-MODULE_AUTHOR( "Kaiyuan Fan, Sophia Lui, Trevor Spear" );
+MODULE_AUTHOR( "Kaiyuan Fan, Sophia Liu, Trevor Spear" );
 MODULE_LICENSE( "GPL" );
 MODULE_DESCRIPTION( "sstf IO scheduler" );
