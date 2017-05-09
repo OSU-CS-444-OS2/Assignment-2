@@ -25,18 +25,13 @@ static void sstf_merged_requests( struct request_queue *q, struct request *rq, s
 static int sstf_dispatch( struct request_queue *q, int force ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
 
-	printk("sstf dispatch running\n");
-
 	if (!list_empty(&sd->queue)) {
 		struct request *rq;
 		rq = list_entry( sd->queue.next, struct request, queuelist );
 		list_del_init( &rq->queuelist );
 		elv_dispatch_sort( q, rq );
-		printk("sstf dispatch ran perfectly\n");
 		return 1;
 	}
-
-	printk("sstf dispatch ran badly\n");
 
 	return 0;
 }
