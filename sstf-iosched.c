@@ -25,13 +25,20 @@ static void sstf_merged_requests( struct request_queue *q, struct request *rq, s
 static int sstf_dispatch( struct request_queue *q, int force ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
 
+	printk("sstf Dispatch running\n");
+
 	if (!list_empty(&sd->queue)) {
 		struct request *rq;
 		rq = list_entry( sd->queue.next, struct request, queuelist );
 		list_del_init( &rq->queuelist );
 		elv_dispatch_sort( q, rq );
+
+		printk("Dispatching: %llu\n", (unsigned long long) rq->__sector);
+
 		return 1;
 	}
+		
+	printk("Dispatching: Nothing\n");
 
 	return 0;
 }
@@ -47,12 +54,11 @@ static void sstf_add_request( struct request_queue *q, struct request *rq ) {
 
 	//this should only happen if this is the starting of the queue
 	if( list_empty( &sd->queue ) ){
-		printk("sstf add request started queue\n");
+		//Starting queue
 		list_add( &rq->queuelist, &sd->queue );
+		printk("sstf added request started queue: %llu\n", (unsigned long long) rq->__sector);
 
 	} else {  //list has been started
-
-		printk("sstf add request adding more request\n");
 
 		//The request that is going through the list
 		rqCheck = list_entry( sd->queue.next, struct request, queuelist );
@@ -64,9 +70,8 @@ static void sstf_add_request( struct request_queue *q, struct request *rq ) {
 
 		//Put it into the list at the place after the spot
 		list_add_tail( &rq->queuelist, &rqCheck->queuelist );
+		printk("sstf added request: %llu\n", (unsigned long long) rq->__sector);
 	}
-	
-	printk("sstf add request done\n");
 }
 
 //former request
