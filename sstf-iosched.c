@@ -25,7 +25,7 @@ static void sstf_merged_requests( struct request_queue *q, struct request *rq, s
 static int sstf_dispatch( struct request_queue *q, int force ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
 
-	printk("sstf Dispatch running\n");
+	//printk("\nsstf Dispatch running\n");
 
 	if (!list_empty(&sd->queue)) {
 		struct request *rq;
@@ -33,12 +33,12 @@ static int sstf_dispatch( struct request_queue *q, int force ) {
 		list_del_init( &rq->queuelist );
 		elv_dispatch_sort( q, rq );
 
-		printk("Dispatching: %llu\n", (unsigned long long) rq->__sector);
+		//printk("\nDispatching: %llu\n", (unsigned long long) rq->__sector);
 
 		return 1;
 	}
 		
-	printk("Dispatching: Nothing\n");
+	//printk("\nDispatching: Nothing\n");
 
 	return 0;
 }
@@ -50,7 +50,7 @@ static void sstf_add_request( struct request_queue *q, struct request *rq ) {
 	struct sstf_data *sd = q->elevator->elevator_data;
 	struct request *rqCheck;
 	
-	printk("sstf add request running\n");
+	//printk("sstf add request running\n");
 
 	//this should only happen if this is the starting of the queue
 	if( list_empty( &sd->queue ) ){
@@ -148,13 +148,13 @@ static struct elevator_type elevator_sstf = {
 
 //init
 static int __init sstf_init( void ) {
-	printk( "sstf is running" );
+	//printk( "\nsstf is running\n" );
 	return elv_register( &elevator_sstf );
 }
 
 //exit
 static void __exit sstf_exit( void )  {
-	printk( "sstf is exiting" );
+	//printk( "\nsstf is exiting\n" );
 	elv_unregister( &elevator_sstf );
 }
 
